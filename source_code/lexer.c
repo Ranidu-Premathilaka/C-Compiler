@@ -91,7 +91,6 @@ token createToken(TOKEN_TYPE type, const char* start, int length){
     }
     ((char*)tok.value)[length] = '\0';
 
-    tok.length = length;
     return tok;
 }
 

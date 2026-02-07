@@ -29,8 +29,11 @@ typedef enum{
 
     L_PAREN_STATE_F,
     R_PAREN_STATE_F,
+    STATE_COUNT
 
 } STATE;
+
+
 
 // IF the order is changed here update the TransitionTable in lexerDFA.c
 typedef enum{

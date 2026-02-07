@@ -1,7 +1,7 @@
 #include "lexerDFA.h"
 
 // Heavily depend on Trapstate being 0 and default behavior of C global arrays to init to 0
-const STATE TransitionTable[][CHAR_CLASS_COUNT] = {
+const STATE TransitionTable[STATE_COUNT][CHAR_CLASS_COUNT] = {
 
     [START_I] =
     {
