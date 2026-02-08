@@ -1,36 +1,33 @@
 #include "lexer.h"
 #include "parser.h"
+#include "executor.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 TOKEN_TYPE getNextTokenType();
 char* getTokenValue();
+void handleArgs(int argc, char *argv[]);
 
 token tokenArray[100];
 int currentTokenIndex = 0;
+
 int isInteractiveMode = 0;
+int delayBetweenTokenReads = 0; // milliseconds
+const char *filename = "";
+
 Node *parseTree = NULL;
 
 int main(int argc, char *argv[]){
 
-    const char *filename = "test.txt";
-    int filenameProvided = 0;
-
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-i") == 0) {
-            isInteractiveMode = 1;
-        } else if (!filenameProvided) {
-            filename = argv[i];
-            filenameProvided = 1;
-        }
-    }
+    handleArgs(argc, argv);
 
     FILE *sourceCode = fopen(filename, "rb");
     if (!sourceCode) {
-        fprintf(stderr, "Failed to open source file: %s\n", filename);
+        printf("Error: Could not open source file '%s'.\n", filename);
         return 1;
     }
 
@@ -38,8 +35,33 @@ int main(int argc, char *argv[]){
     parseTree = initParse(getNextTokenType, getTokenValue);
     startParse(parseTree);
 
+    printf("\nExecuting Program:\n");
+    traverseAndExecute(parseTree);
+
     fclose(sourceCode);
     return 0;
+}
+
+void handleArgs(int argc, char *argv[]){
+    for(int i = 1; i < argc; i++){
+        switch(argv[i][1]){
+            case 'i':
+                isInteractiveMode = 1;
+                break;
+            case 'd':
+                if(i + 1 < argc && !isInteractiveMode){
+                    delayBetweenTokenReads = atoi(argv[++i]);
+                }
+                break;
+        }
+    }
+
+    if(argc < 2){
+        printf("Usage: ./a.out <source_file> [-i] [-d delay_ms] \n");
+        exit(EXIT_FAILURE);
+    }
+
+    filename = argv[1];
 }
 
 void displayTokenStream(){
@@ -51,9 +73,10 @@ void displayTokenStream(){
 
 void waitForUser(){
     if(!isInteractiveMode){
+        usleep(delayBetweenTokenReads * 1000);
         return;
     }
-    printf("Press Enter to continue...");
+    printf("Press Enter to continue...\n");
     getchar();
 }
 

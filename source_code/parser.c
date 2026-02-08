@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "executor.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -135,7 +136,7 @@ void term(Node *parent){
         return;
     }
     if(expect(TOKEN_ID)){
-        Node *node = createNode(ID);
+        Node *node = createNode(VAR);
         addNodeData(node, getTokenDataFunc());
         addChild(parent, node);
         accept(TOKEN_ID);
@@ -188,7 +189,10 @@ void expr(Node *parent){
         mainNode = newMainNode;
     }
 
-    addChild(parent, mainNode);
+    Node *assignNode = createNode(OP);
+    addNodeData(assignNode, "=");
+    addChild(assignNode, mainNode);
+    addChild(parent, assignNode);
 }
 
 Node *initParse(getNextToken getNextTokenFunction, getTokenData getTokenDataFunction) {

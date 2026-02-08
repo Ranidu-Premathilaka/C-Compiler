@@ -31,6 +31,22 @@ void addChild(Node *parent, Node *child) {
     parent->childCount++;
 }
 
+Node *getChild(Node *node, int child){
+    if(child < node->childCount){
+        return node->children[child];
+    }
+
+    return NULL;
+}
+
+int getChildCount(Node *node){
+    return node->childCount;
+}
+
+char *getNodeData(Node *node){
+    return node->data;
+}
+
 void freeNode(Node *node) {
     if (node->data) {
         free(node->data);

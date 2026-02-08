@@ -1,5 +1,6 @@
 #include "tokenType.h"
 #include "parseTree.h"
+#include "symbolTable.h"
 
 #ifndef PARSER_H
 #define PARSER_H
@@ -16,6 +17,7 @@ typedef enum {
     ARGS,
     TERM,
     LITERAL,
+    VAR,
     TYPE,
     EXPR,
     ID,
@@ -32,6 +34,7 @@ static const char *nodeTypeToString(int nodeType) {
         case ARGS:        return "ARGS";
         case TERM:        return "TERM";
         case LITERAL:     return "LITERAL";
+        case VAR:         return "VAR";
         case TYPE:        return "TYPE";
         case EXPR:        return "EXPR";
         case ID:          return "ID";
