@@ -1,3 +1,8 @@
 .vscode/*
 source_code/a.out
 source_code/a.out.*
+doc/*
+!doc/*.pdf
+!doc/*.tex
+!doc/*.png
+
