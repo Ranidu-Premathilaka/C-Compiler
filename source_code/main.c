@@ -10,6 +10,7 @@
 
 TOKEN_TYPE getNextTokenType();
 char* getTokenValue();
+int getTokenLineCount();
 void handleArgs(int argc, char *argv[]);
 
 token tokenArray[100];
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]){
     }
 
     initializeLexer(sourceCode);
-    parseTree = initParse(getNextTokenType, getTokenValue);
+    parseTree = initParse(getNextTokenType, getTokenValue, getTokenLineCount);
     startParse(parseTree);
 
     printf("\nExecuting Program:\n");
@@ -93,4 +94,8 @@ TOKEN_TYPE getNextTokenType(){
 
 char* getTokenValue(){
     return tokenArray[currentTokenIndex-1].value;
+}
+
+int getTokenLineCount(){
+    return tokenArray[currentTokenIndex-1].lineNumber;
 }

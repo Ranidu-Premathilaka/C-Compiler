@@ -6,6 +6,7 @@
 
 getNextToken getNextTokenFunc;
 getTokenData getTokenDataFunc;
+getTokenLine getTokenLineCountFunc;
 TOKEN_TYPE currentTokenType;
 
 void program(Node *root);
@@ -20,7 +21,7 @@ void type(Node *parent);
 void expr(Node *parent);
 
 static void parseError(const char *message) {
-    fprintf(stderr, "Parse error: %s (current token: %d)\n", message, currentTokenType);
+    fprintf(stderr, "Parse error: %s (current token: %s at line %d)\n", message, tokenTypeToString(currentTokenType), getTokenLineCountFunc());
     exit(EXIT_FAILURE);
 }
 
@@ -80,6 +81,7 @@ void declaration(Node *parent){
     }
     Node *idNode = createNode(ID);
     addNodeData(idNode, getTokenDataFunc());
+    addNodeLineInfo(idNode, getTokenLineCountFunc());
     addChild(node, idNode);
     accept(TOKEN_ID);
 
@@ -104,6 +106,7 @@ void funcCall(Node *parent){
     addChild(parent, node);
     Node *idNode = createNode(ID);
     addNodeData(idNode, getTokenDataFunc());
+    addNodeLineInfo(idNode, getTokenLineCountFunc());
     addChild(node, idNode);
     accept(TOKEN_ID);
 
@@ -138,6 +141,7 @@ void term(Node *parent){
     if(expect(TOKEN_ID)){
         Node *node = createNode(VAR);
         addNodeData(node, getTokenDataFunc());
+        addNodeLineInfo(node, getTokenLineCountFunc());
         addChild(parent, node);
         accept(TOKEN_ID);
         return;
@@ -152,6 +156,7 @@ void literal(Node *parent){
     }
     Node *node = createNode(LITERAL);
     addNodeData(node, getTokenDataFunc());
+    addNodeLineInfo(node, getTokenLineCountFunc());
     addChild(parent, node);
     accept(TOKEN_INT_LITERAL);
 }
@@ -162,6 +167,7 @@ void type(Node *parent){
     }
     Node *node = createNode(TYPE);
     addNodeData(node, "int");
+    addNodeLineInfo(node, getTokenLineCountFunc());
     addChild(parent, node);
     accept(TOKEN_KW_INT);
 }
@@ -172,10 +178,12 @@ void expr(Node *parent){
     term(mainNode);
     if(expect(TOKEN_ADD_OP)){
         addNodeData(mainNode, "+");
+        addNodeLineInfo(mainNode, getTokenLineCountFunc());
         accept(TOKEN_ADD_OP);
         term(mainNode);
     }else{
         addNodeData(mainNode, "=");
+        addNodeLineInfo(mainNode, getTokenLineCountFunc());
         addChild(parent, mainNode);
         return;
     }
@@ -183,6 +191,7 @@ void expr(Node *parent){
     while(expect(TOKEN_ADD_OP)){
         Node *newMainNode = createNode(OP);
         addNodeData(newMainNode, "+");
+        addNodeLineInfo(newMainNode, getTokenLineCountFunc());
         addChild(newMainNode, mainNode);
         accept(TOKEN_ADD_OP);
         term(newMainNode);
@@ -191,13 +200,15 @@ void expr(Node *parent){
 
     Node *assignNode = createNode(OP);
     addNodeData(assignNode, "=");
+    addNodeLineInfo(assignNode, getTokenLineCountFunc());
     addChild(assignNode, mainNode);
     addChild(parent, assignNode);
 }
 
-Node *initParse(getNextToken getNextTokenFunction, getTokenData getTokenDataFunction) {
+Node *initParse(getNextToken getNextTokenFunction, getTokenData getTokenDataFunction, getTokenLine getTokenLineCountFunction) {
     getNextTokenFunc = getNextTokenFunction;
     getTokenDataFunc = getTokenDataFunction;
+    getTokenLineCountFunc = getTokenLineCountFunction;
 
     currentTokenType = getNextTokenFunc();
     Node *root = createNode(PROGRAM);

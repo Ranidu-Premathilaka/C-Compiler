@@ -12,6 +12,20 @@ int eval(Node *node);
 int evalVar(Node *node);
 int evalOp(Node *node);
 
+// Centralized error handler for nodes
+void runtimeError(Node *node, const char *errorText) {
+    printf("Runtime error: %s\n", errorText);
+    if (node) {
+        if (node->data) {
+            printf("  Node data: %s\n", node->data);
+        }
+        if(node->lineNumber) {
+            printf("  Line number: %d\n", node->lineNumber);
+        }
+    }
+    exit(EXIT_FAILURE);
+}
+
 void traverseAndExecute(Node *node) {
     if (!node) return;
 
@@ -43,14 +57,12 @@ void executeDeclaration(Node *node){
     // [0] = TYPE, [1] = ID, [2] = OP
     Node *idNode = getChild(node, 1);
     if(idNode->nodeType != ID || !getNodeData(idNode)){
-        printf("Runtime error: invalid declaration, expected identifier.\n");
-        exit(EXIT_FAILURE);
+        runtimeError(idNode, "invalid declaration, expected identifier.");
     }
 
     Node *exprNode = getChild(node, 2);
     if(exprNode->nodeType != OP || !getNodeData(exprNode) || strcmp(getNodeData(exprNode), "=") != 0){
-        printf("Runtime error: invalid declaration, expected '=' operator.\n");
-        exit(EXIT_FAILURE);
+        runtimeError(exprNode, "invalid declaration, expected '=' operator.");
     }
 
     int value = eval(exprNode);
@@ -58,8 +70,7 @@ void executeDeclaration(Node *node){
     if (isInSymbolTable(getNodeData(idNode)) == -1) {
         createIntVarSymbol(getNodeData(idNode), value);
     } else {
-        fprintf(stderr, "variable '%s' already defined\n", getNodeData(idNode));
-        exit(EXIT_FAILURE);
+        runtimeError(idNode, "variable already defined");
     }
 }
 
@@ -69,8 +80,7 @@ void executeFuncCall(Node *node){
     // [0] = ID
     Node *idNode = getChild(node, 0);
     if (!idNode || !getNodeData(idNode) || idNode->nodeType != ID) {
-        printf("Runtime error: invalid function call, expected identifier.\n");
-        exit(EXIT_FAILURE);
+        runtimeError(idNode, "invalid function call, expected identifier.");
     }
 
     // the print function is supported by default
@@ -78,8 +88,7 @@ void executeFuncCall(Node *node){
 
         Node *argsNode = getChild(node, 1);
         if (!argsNode || getChildCount(argsNode) != 1) {
-            printf("Runtime error: print expects one argument.\n");
-            exit(EXIT_FAILURE);
+            runtimeError(argsNode, "print expects one argument.");
         }
 
         // currently print only supports one argument
@@ -87,7 +96,7 @@ void executeFuncCall(Node *node){
         int value = eval(argExpr);
         printf("%d\n", value);
     } else {
-        fprintf(stderr, "Runtime error: unknown function '%s'.\n", idNode->data);
+        runtimeError(idNode, "unknown function");
     }
 }
 
@@ -106,16 +115,15 @@ int eval(Node *node){
             return evalOp(node);
 
         default:
-            printf("Runtime error: cannot evaluate node of type '%d'.\n", node->nodeType);
-            exit(EXIT_FAILURE);        
+            runtimeError(node, "cannot evaluate node of this type.");
+            return -1; // Unreachable
     }
 }
 
 int evalVar(Node *node){
     int index = isInSymbolTable(node->data);
     if (index == -1) {
-        printf("Runtime error: undefined variable '%s'.\n", node->data);
-        exit(EXIT_FAILURE);
+        runtimeError(node, "undefined variable");
     }
     return getSymbolInt(index);
 }
@@ -124,8 +132,7 @@ int evalOp(Node *node){
 
     if (strcmp(getNodeData(node), "+") == 0) {
         if(getChildCount(node) != 2){
-            printf("Runtime error: '+' operator expects two operands.\n");
-            exit(EXIT_FAILURE);
+            runtimeError(node, "'+' operator expects two operands.");
         }
         int left = eval(getChild(node, 0));
         int right = eval(getChild(node, 1));
@@ -134,13 +141,12 @@ int evalOp(Node *node){
 
     if (strcmp(getNodeData(node), "=") == 0) {
         if(getChildCount(node) != 1){
-            printf("Runtime error: '=' operator expects only one operand.\n");
-            exit(EXIT_FAILURE);
+            runtimeError(node, "'=' operator expects only one operand.");
         }
         return eval(getChild(node, 0));
     }
 
     // Unknown operator
-    printf("Runtime error: unknown operator '%s'.\n", getNodeData(node));
-    exit(EXIT_FAILURE);
+    runtimeError(node, "unknown operator");
+    return -1; 
 }

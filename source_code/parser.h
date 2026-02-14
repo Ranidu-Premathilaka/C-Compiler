@@ -7,6 +7,7 @@
 
 typedef TOKEN_TYPE (*getNextToken)();
 typedef char* (*getTokenData)();
+typedef int (*getTokenLine)();
 
 typedef enum {
     PROGRAM,
@@ -46,7 +47,7 @@ static const char *nodeTypeToString(int nodeType) {
 
 
 
-Node *initParse(getNextToken getNextTokenFunction, getTokenData getTokenDataFunction);
+Node *initParse(getNextToken getNextTokenFunction, getTokenData getTokenDataFunction, getTokenLine getTokenLineCountFunction);
 void startParse(Node *root);
 
 #endif

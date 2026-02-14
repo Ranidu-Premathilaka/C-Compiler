@@ -11,7 +11,7 @@
 typedef struct{
     TOKEN_TYPE type;
     char* value;
-    int length;
+    int lineNumber;
 } token;
 
 typedef struct{

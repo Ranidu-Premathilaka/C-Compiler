@@ -22,6 +22,10 @@ void addNodeData(Node *node, const char *data) {
     strcpy(node->data, data);
 }
 
+void addNodeLineInfo(Node *node, int lineNumber) {
+    node->lineNumber = lineNumber;
+}
+
 void addChild(Node *parent, Node *child) {
     if (parent->childCount >= parent->childCapacity) {
         parent->childCapacity *= 2;

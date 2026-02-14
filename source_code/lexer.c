@@ -4,12 +4,14 @@
 token computeNextTokenFromSource();
 token createToken(TOKEN_TYPE type, const char* start, int length);
 int skipChars(char ch);
+void updateLineCounter();
 char peakCurrentChar();
 void popCurrentChar();
 
 token currentToken;
 token lookaheadToken;
 reader lexerReader;
+int lineCounter = 1;
 
 
 void initializeLexer(FILE *sourceCode){
@@ -56,6 +58,7 @@ token computeNextTokenFromSource(){
             if(currentLexemeLength){
                 break;
             }else{
+                updateLineCounter();
                 popCurrentChar();
                 continue;
             }
@@ -91,11 +94,19 @@ token createToken(TOKEN_TYPE type, const char* start, int length){
     }
     ((char*)tok.value)[length] = '\0';
 
+    tok.lineNumber = lineCounter;
+
     return tok;
 }
 
 int skipChars(char ch){
     return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
+}
+
+void updateLineCounter(){
+    if(peakCurrentChar() == '\n'){
+        lineCounter++;
+    }
 }
 
 char peakCurrentChar(){

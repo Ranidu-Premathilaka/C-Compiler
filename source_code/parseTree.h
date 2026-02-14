@@ -5,6 +5,7 @@ typedef struct Node {
     int nodeType; // e.g. PROGRAM, STMT_LIST, EXPR, ...
     struct Node **children;
     char *data;
+    int lineNumber;
     int childCount;
     int childCapacity;
 } Node;
@@ -12,6 +13,7 @@ typedef struct Node {
 
 Node *createNode(int nodeType);
 void addNodeData(Node *node, const char *data);
+void addNodeLineInfo(Node *node, int lineNumber);
 void addChild(Node *parent, Node *child);
 Node *getChild(Node *node, int child);
 int getChildCount(Node *node);
